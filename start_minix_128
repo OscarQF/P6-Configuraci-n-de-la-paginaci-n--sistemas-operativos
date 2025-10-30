@@ -1,0 +1,25 @@
+#!/bin/bash
+
+USR_HOME=$(echo ~)
+WK_PATH="${USR_HOME}/Disco"
+
+ID_ALUMNO=##id##
+
+IMAGEPATH="${WK_PATH}/Imagen"
+IMAGENAME="minix3hd.plot.${ID_ALUMNO}.qcow2"
+MINIXOUT="${WK_PATH}/Salida"
+MINIXLOG="${WK_PATH}/Minix.e9.log"
+
+MINIX_PATH="${IMAGEPATH}/${IMAGENAME}"
+
+qemu-system-x86_64 \
+    -cpu "pentium3" \
+    -m 128 \
+    -name "${ID_ALUMNO}" \
+    -rtc base=localtime \
+    -hda "${MINIX_PATH}" \
+    -drive file=fat:rw:"${MINIXOUT}",format=raw,media=disk,cache=none \
+    -netdev tap,id=n1,ifname=tap0,script=no,downscript=no \
+    -device ne2k_pci,netdev=n1,mac=52:54:98:76:54:32 \
+    -debugcon file:${MINIXLOG} \
+    -display gtk,grab-on-hover=off
