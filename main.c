@@ -20,6 +20,7 @@
 #include <minix/callnr.h>
 #include <minix/com.h>
 #include <minix/endpoint.h>
+#include <stdio.h>
 #include <stdint.h> /* Agregado para poder usar uint32_t */
 #include <sys/vm.h> /* PAGE_SIZE, I386_VM_PRESENT, ... , I386_CR0_PG */
 #include "proc.h"
@@ -32,17 +33,41 @@ FORWARD _PROTOTYPE(void shutdown, (timer_t * tp));
 /* Macros para paginación */
 #define CEIL_DIV(x, y) (((x) + (y) - 1) / (y))
 #define MEM_SIZE_MB 128
+#define NUM_PAGS_MAPEADAS ((MEM_SIZE_MB*1024*1024)/PAGE_SIZE)
+#define PTE_SIZE_BYTES 4
+#define NUM_PAGS_PT (CEIL_DIV((NUM_PAGS_MAPEADAS*PTE_SIZE_BYTES),PAGE_SIZE))
+#define NUM_PAGS_PD 1
+
+
+#define ALIGN_UP(addr, size) addr + (size-1) & ~(size-1)
+#define OFFSET_SEG_TO_LINEAL(ptr)  ((uint32_t)(kinfo.data_base) + (uint32_t)(ptr))
+#define LINEAL_TO_OFFSET_SEG(addr)  ((uint32_t)(addr) - (uint32_t)(kinfo.data_base))
+
 
 /* Tipos para paginación */
 typedef uint32_t pte_t;
 typedef uint32_t pde_t;
 
+void imprimir_info_var(char* nombre_var, void* var) {
+    uint32_t desp_segmento = (uint32_t) var;
+    uint32_t dir_lineal = OFFSET_SEG_TO_LINEAL(desp_segmento);
+
+    printf(":%s\n", nombre_var);
+    printf(" desp. en el segmento:0x%08X\n",desp_segmento);
+    printf(" dir. lineal: 0x%08X\n", dir_lineal);
+}
+
 /*===========================================================================*
  *                            configurar_paginacion
  *===========================================================================*/
-PRIVATE void configurar_paginacion(void)
+ static void configurar_paginacion(void)
 {
+    int foo=0x00009E2C;
+    int* ptr=&foo;
+    imprimir_info_var("ptr",ptr);
 }
+
+
 
 /*===========================================================================*
  *				main                                         *
